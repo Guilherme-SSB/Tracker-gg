@@ -1,17 +1,13 @@
 import datetime
-import logging
-import os
 import time
-from pathlib import Path
 
 import pandas as pd
-from help_functions import (clean_screen, find_element_by_xpath, find_elements_by_class_name,
-                            iniciate_chromedriver)
 from tqdm import tqdm
 
+from help_functions import (clean_screen, find_elements_by_class_name,
+                            iniciate_chromedriver)
 
 TODAY = str(datetime.datetime.now().date())
-#with tqdm(range(len(DF)), colour='blue', desc=f'') as pbar:
 
 def tratar_horas(tempo_jogado: str) -> float:
     if tempo_jogado == '0':
@@ -65,10 +61,7 @@ def coletar_dados(driver, URL: str, modo_jogo: str) -> pd.DataFrame:
 def main():
     df_final = pd.DataFrame()
 
-    # nick = 'final%20boss%231982'
-    # nick = 'alguém%23xxxxx'
-    # nick = 'DesertIgor%231412'
-    nick = 'ESP%20M4BALA%2369420'
+    nick = ''
 
     URL_COMPETITIVE = f'https://tracker.gg/valorant/profile/riot/{nick}/agents?season=all'
     URL_DEATHMATCH = f'https://tracker.gg/valorant/profile/riot/{nick}/agents?playlist=deathmatch&season=all'
@@ -82,6 +75,7 @@ def main():
     
     time.sleep(5)
 
+    # Coleta dos dados
     df_competitivo = coletar_dados(driver, URL_COMPETITIVE, 'Competitivo')
     df_deathmatch = coletar_dados(driver, URL_DEATHMATCH, 'Deathmatch')
     df_escalation = coletar_dados(driver, URL_ESCALATION, 'Escalation')
@@ -90,7 +84,7 @@ def main():
     df_spike_rush = coletar_dados(driver, URL_SPIKE_RUSH, 'Spike Rush')
     df_unrated = coletar_dados(driver, URL_UNRATED, 'Unrated')
 
-    # df_final = pd.concat([df_competitivo, df_deathmatch, df_escalation, df_replication, df_snowball, df_spike_rush, df_unrated])
+    # Concatenando os dataframes
     df_final = pd.merge(df_competitivo, df_deathmatch, on='AGENTE', how='outer')
     df_final = pd.merge(df_final, df_escalation, on='AGENTE', how='outer')
     df_final = pd.merge(df_final, df_replication, on='AGENTE', how='outer')
@@ -101,8 +95,7 @@ def main():
 
     print(df_final)
 
-    df_final.to_csv('Base_Matheuzão.csv', index=False)
-
+    df_final.to_csv('outputs/Base_Tracker_GG.csv', index=False)
 
     driver.quit()
 
